@@ -22,6 +22,7 @@ namespace FlightSimulator.Views
     /// </summary>
     public partial class Joystick : UserControl
     {
+       
         /// <summary>Current Aileron</summary>
         public static readonly DependencyProperty AileronProperty =
             DependencyProperty.Register("Aileron", typeof(double), typeof(Joystick),null);
@@ -103,7 +104,7 @@ namespace FlightSimulator.Views
 
         /// <summary>This event fires once the joystick is captured</summary>
         public event EmptyJoystickEventHandler Captured;
-
+        private VirtualJoystickEventArgs virtualJoystickEventArgs;
         private Point _startPos;
         private double _prevAileron, _prevElevator;
         private double canvasWidth, canvasHeight;
@@ -116,7 +117,7 @@ namespace FlightSimulator.Views
             Knob.MouseLeftButtonDown += Knob_MouseLeftButtonDown;
             Knob.MouseLeftButtonUp += Knob_MouseLeftButtonUp;
             Knob.MouseMove += Knob_MouseMove;
-
+            virtualJoystickEventArgs = new VirtualJoystickEventArgs();
             centerKnob = Knob.Resources["CenterKnob"] as Storyboard;
         }
 
@@ -154,12 +155,14 @@ namespace FlightSimulator.Views
 
             if (Moved == null ||
                 (!(Math.Abs(_prevAileron - Aileron) > AileronStep) && !(Math.Abs(_prevElevator - Elevator) > ElevatorStep)))
-                return;
-
-            Moved?.Invoke(this, new VirtualJoystickEventArgs { Aileron = Aileron, Elevator = Elevator });
-            _prevAileron = Aileron;
-            _prevElevator = Elevator;
-
+            {
+                //Moved?.Invoke(this, new VirtualJoystickEventArgs { Aileron = Aileron, Elevator = Elevator });
+                virtualJoystickEventArgs.Aileron = Aileron;
+                virtualJoystickEventArgs.Elevator = Elevator;
+                _prevAileron = Aileron;
+                _prevElevator = Elevator;
+            }
+             
         }
 
         private void Knob_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)

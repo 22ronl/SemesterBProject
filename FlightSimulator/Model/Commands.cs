@@ -53,6 +53,12 @@ namespace FlightSimulator.Model
             //}).Start();
 
         }
+        public void commandSimulator(string command)
+        {
+            string binaryCommand = command + "\r\n";
+            byte[] bufferRoWrite = Encoding.ASCII.GetBytes(binaryCommand);
+            stream.Write(bufferRoWrite, 0, bufferRoWrite.Length);
+        }
               
   
         public void sendCommand(string userCommands)
@@ -65,11 +71,8 @@ namespace FlightSimulator.Model
             foreach(string command in commands)
             {
                 //using (BinaryWriter writer = new BinaryWriter(stream))
-               // {
-                    string binaryCommand = command + "\r\n";
-
-                byte[] bufferRoWrite = Encoding.ASCII.GetBytes(binaryCommand);
-                stream.Write(bufferRoWrite, 0, bufferRoWrite.Length);
+                // {
+                commandSimulator(command);
                // }
                 System.Threading.Thread.Sleep(2000);
             }

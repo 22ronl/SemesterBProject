@@ -22,6 +22,7 @@ namespace FlightSimulator.ViewModels
             set
             {
                 rudder = value;
+                sliderMove("set controls/flight/rudder", rudder);
                 NotifyPropertyChanged("rudder");
             }
         }
@@ -35,15 +36,17 @@ namespace FlightSimulator.ViewModels
             set
             {
                 throttle = value;
-                Console.WriteLine(throttle);
+                //Console.WriteLine(throttle);
+                sliderMove("set controls/engines/current-engine/throttle", throttle);
                 NotifyPropertyChanged("throttle");
             }
         }
-        // private void OnSlider()
-        //{
-        //  string num = rudder.ToString;
-        //  string input = "set controls/filght/rudder";
-        //  Commands.Instance.sendCommand(input);
-        //  }
+         private void sliderMove(string slider ,double value)
+        {
+          string val = value.ToString("0.00");
+          string input = slider + " " + val;
+          //Console.WriteLine(input);
+          Commands.Instance.commandSimulator(input);
+        }
     }
 }

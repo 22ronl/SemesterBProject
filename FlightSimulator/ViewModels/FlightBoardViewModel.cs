@@ -12,18 +12,18 @@ namespace FlightSimulator.ViewModels
     {
         private InfoServer infoServer;
         public FlightBoardViewModel() {
-            this.infoServer = InfoServer.Instance;
+            infoServer = InfoServer.Instance;
             infoServer.PropertyChanged +=
                 delegate (object sender, PropertyChangedEventArgs e) {
                     NotifyPropertyChanged(e.PropertyName);
                 };
         }
-        public double Lon
+        public Nullable<float> Lon
         {
             get { return infoServer.Lon; }
         }
 
-        public double Lat
+        public Nullable<float> Lat
         {
             get { return infoServer.Lat;}
         }

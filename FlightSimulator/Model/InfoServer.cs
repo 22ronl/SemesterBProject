@@ -17,8 +17,8 @@ namespace FlightSimulator.Model
         private TcpClient client;
         private NetworkStream stream;
         private BinaryReader reader;
-        private double lon;
-        private double lat;
+        private Nullable<float> lon =null;
+        private Nullable<float> lat=null;
         private static InfoServer m_Instance = null;
         public event PropertyChangedEventHandler PropertyChanged;
         public static InfoServer Instance
@@ -32,7 +32,12 @@ namespace FlightSimulator.Model
                 return m_Instance;
             }
         }
-        public double Lon
+
+        NetworkStream GetNetworkStream()
+        {
+            return stream;
+        }
+        public Nullable<float> Lon
         {
             get { return lon; }
             set
@@ -41,7 +46,7 @@ namespace FlightSimulator.Model
                 NotifyPropertyChanged("Lon");
             }
         }
-        public double Lat
+        public Nullable<float> Lat
         {
             get { return lat; }
             set
@@ -57,8 +62,9 @@ namespace FlightSimulator.Model
             {
                 listen(ApplicationSettingsModel.Instance.FlightServerIP, ApplicationSettingsModel.Instance.FlightInfoPort);
                 //System.Windows.Forms.MessageBox.Show("connected");
-                readFromServer();
                 isSereverOpen = true;
+                readFromServer();
+                
             }).Start();
         }
         public void listen(string ip, int port)
@@ -66,24 +72,39 @@ namespace FlightSimulator.Model
             IPEndPoint ep = new IPEndPoint(IPAddress.Parse(ip), port);
             listener = new TcpListener(ep);
             listener.Start();
-            Console.WriteLine("Waiting for client connections...");
             client = listener.AcceptTcpClient();
-            Console.WriteLine("Client connected");
-            stream = client.GetStream();
-            reader = new BinaryReader(stream);
         }
 
         public void readFromServer()
         {
             string simulatorData;
             string[] planeData;
-          //  while (isSereverOpen)
-            //{
-                simulatorData = reader.ReadString();
-                planeData = simulatorData.Split(',');
-                Lon = Double.Parse(planeData[0]);
-                Lat = Double.Parse(planeData[1]); 
-            //}
+            char letter;
+            //NetworkStream networkStream;
+            using (NetworkStream stream = client.GetStream())
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                while (isSereverOpen)
+                {
+                    //networkStream = GetNetworkStream();
+                    //stream = client.GetStream();
+                    //BinaryReader reader = new BinaryReader(networkStream);
+                    simulatorData = "";
+                    while ((letter = reader.ReadChar()) != '\n')
+                    {
+                        simulatorData += letter;
+                    }
+                    if(simulatorData == "")
+                    {
+                        break;
+                    }
+                    planeData = simulatorData.Split(',');
+                    Lon = float.Parse(planeData[0]);
+                    Lat = float.Parse(planeData[1]);
+                    Console.WriteLine(simulatorData);
+                    Thread.Sleep(500);
+                }
+            }
         }
         public void NotifyPropertyChanged(string propName)
         {

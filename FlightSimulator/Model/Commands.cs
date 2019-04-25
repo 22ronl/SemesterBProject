@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Net;
-using System.IO;
 using System.Threading;
 namespace FlightSimulator.Model
 {
@@ -15,7 +11,10 @@ namespace FlightSimulator.Model
         private TcpClient client;
         private NetworkStream stream;
         private bool isConnected = false;
+        private bool isProgramAlive = true;
         private static Commands m_Instance = null;
+        private static Mutex mutex = new Mutex();
+        private Thread connection;
         public static Commands Instance
         {
             get
@@ -27,34 +26,55 @@ namespace FlightSimulator.Model
                 return m_Instance;
             }
         }
+        public bool IsProgramAlive
+        {   
+            get
+            {
+                return isProgramAlive;
+            }
+            set
+            {
+                mutex.WaitOne();
+                isProgramAlive = value;
+                mutex.ReleaseMutex();
+            }
+        }
+
         public void openClient()
         {
-            new Thread(delegate ()
+            connection = new Thread(delegate ()
             {
                 connect(ApplicationSettingsModel.Instance.FlightServerIP, ApplicationSettingsModel.Instance.FlightCommandPort);
-            }).Start();
-            
+            });
+            connection.Start();
         }
         public void connect(string ip, int port)
         {
-           // new Thread(delegate (){
-                IPEndPoint ep = new IPEndPoint(IPAddress.Parse(ip), port);
-                client = new TcpClient();
-                //client.Connect(ep);
-                //
-                
-                while (!client.Connected)
+            IPEndPoint ep = new IPEndPoint(IPAddress.Parse(ip), port);
+            client = new TcpClient();
+            while (true)
+            {
+                if(!IsProgramAlive)
                 {
-                    try { client.Connect(ep); }
-                    catch (Exception) { }
+                    return;
                 }
+                if(client.Connected)
+                {
+                    break;
+                }
+                try { client.Connect(ep); }
+                catch (Exception) { }
+            }
             isConnected = true;
             stream = client.GetStream();
-            //}).Start();
 
         }
         public void commandSimulator(string command)
         {
+            if (!isConnected)
+            {
+                return;
+            }
             string binaryCommand = command + "\r\n";
             byte[] bufferRoWrite = Encoding.ASCII.GetBytes(binaryCommand);
             stream.Write(bufferRoWrite, 0, bufferRoWrite.Length);
@@ -70,12 +90,18 @@ namespace FlightSimulator.Model
             string[] commands = userCommands.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             foreach(string command in commands)
             {
-                //using (BinaryWriter writer = new BinaryWriter(stream))
-                // {
                 commandSimulator(command);
-               // }
-                System.Threading.Thread.Sleep(2000);
+                Thread.Sleep(2000);
             }
+        }
+
+        public void close()
+        {
+            if(connection.IsAlive)
+            {
+                IsProgramAlive = false;
+            }
+            client.Close();
         }
     }
 }

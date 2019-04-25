@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:FlightSimulator"
         xmlns:local2="clr-namespace:FlightSimulator.Views"
         mc:Ignorable="d"
-        Title="MainWindow" Height="550" Width="1100">
+        
+        Title="MainWindow" Height="550" Width="1100"  >
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
@@ -16,7 +17,8 @@
             <RowDefinition Height="50"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
-        <TextBlock Text="Flight Simulatior" Grid.RowSpan="2" FontWeight="Bold" FontSize="30"></TextBlock>
+        <Button FontWeight="Bold" FontSize="20" Content="Disconnect"    Width="120" Height="40" Grid.Column="1" Command="{Binding DisconnectCommand}"></Button>
+        <TextBlock Text="Flight Simulatior" Grid.RowSpan="2" FontWeight="Bold" FontSize="30" ></TextBlock>
         <local2:planeBoard Grid.Column="0" Grid.Row="1"></local2:planeBoard>
         <local2:planeControl Grid.Column="1" Grid.Row="1"></local2:planeControl>
     </Grid>

@@ -9,19 +9,19 @@ namespace FlightSimulator.ViewModels
 {  
     class AutoPilotViewModels : BaseNotify
     {
-        
+        public bool whiteBackGround = true;
         public string inputString ="";
         public string changeColor
         {
             get
             {
-                if (inputString == "")
+                if (whiteBackGround)
                 {
                     return "white";
                 }
                 else
                 {
-                    return "Red";
+                    return "Pink";
                 }
                 
             }
@@ -35,6 +35,13 @@ namespace FlightSimulator.ViewModels
             set
             {
                 inputString = value;
+                if(inputString == "")
+                {
+                    whiteBackGround = true;
+                } else
+                {
+                    whiteBackGround = false;
+                } 
                 NotifyPropertyChanged("inputString");
                 NotifyPropertyChanged("changeColor");
             }
@@ -50,6 +57,8 @@ namespace FlightSimulator.ViewModels
         }
         private void OnOk()
         {
+            whiteBackGround = true;
+            NotifyPropertyChanged("changeColor");
             Commands.Instance.sendCommand(userInput);
         }
 

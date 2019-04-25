@@ -14,6 +14,7 @@ namespace FlightSimulator.Model.EventArgs
             {
                 aileron = value;
                 string input = "set controls/flight/aileron " + aileron.ToString("0.00");
+                // send the command to the simulator throw command chanel 
                 Commands.Instance.commandSimulator(input);
             }
 

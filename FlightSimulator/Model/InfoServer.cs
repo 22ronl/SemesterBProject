@@ -12,14 +12,13 @@ namespace FlightSimulator.Model
 {
     class InfoServer : INotifyPropertyChanged
     {
-        private bool isSereverOpen;
-        private TcpListener listener;
-        private TcpClient client;
-        private NetworkStream stream;
-        private BinaryReader reader;
-        private Nullable<float> lon =null;
-        private Nullable<float> lat=null;
+        private bool isProgramAlive = true;
+        private TcpListener listener = null;
+        private TcpClient client = null;
+        private Nullable<float>lon =null;
+        private Nullable<float>lat=null;
         private static InfoServer m_Instance = null;
+        private static Mutex mutex = new Mutex();
         public event PropertyChangedEventHandler PropertyChanged;
         public static InfoServer Instance
         {
@@ -32,10 +31,18 @@ namespace FlightSimulator.Model
                 return m_Instance;
             }
         }
-
-        NetworkStream GetNetworkStream()
+        public bool IsProgramAlive
         {
-            return stream;
+            get
+            {
+                return isProgramAlive;
+            }
+            set
+            {
+                mutex.WaitOne();
+                isProgramAlive = value;
+                mutex.ReleaseMutex();
+            }
         }
         public Nullable<float> Lon
         {
@@ -61,10 +68,10 @@ namespace FlightSimulator.Model
             new Thread(delegate ()
             {
                 listen(ApplicationSettingsModel.Instance.FlightServerIP, ApplicationSettingsModel.Instance.FlightInfoPort);
-                //System.Windows.Forms.MessageBox.Show("connected");
-                isSereverOpen = true;
-                readFromServer();
-                
+                if (IsProgramAlive)
+                {
+                    readFromServer();
+                }
             }).Start();
         }
         public void listen(string ip, int port)
@@ -72,7 +79,8 @@ namespace FlightSimulator.Model
             IPEndPoint ep = new IPEndPoint(IPAddress.Parse(ip), port);
             listener = new TcpListener(ep);
             listener.Start();
-            client = listener.AcceptTcpClient();
+            try { client = listener.AcceptTcpClient(); }
+            catch { return; }
         }
 
         public void readFromServer()
@@ -80,18 +88,19 @@ namespace FlightSimulator.Model
             string simulatorData;
             string[] planeData;
             char letter;
-            //NetworkStream networkStream;
             using (NetworkStream stream = client.GetStream())
             using (BinaryReader reader = new BinaryReader(stream))
             {
-                while (isSereverOpen)
+                while (IsProgramAlive)
                 {
-                    //networkStream = GetNetworkStream();
-                    //stream = client.GetStream();
-                    //BinaryReader reader = new BinaryReader(networkStream);
                     simulatorData = "";
-                    while ((letter = reader.ReadChar()) != '\n')
-                    {
+                    while (true)
+                    { 
+                        try {
+                            if ((letter = reader.ReadChar()) == '\n') 
+                                break;
+                        }
+                        catch { return; }
                         simulatorData += letter;
                     }
                     if(simulatorData == "")
@@ -101,14 +110,26 @@ namespace FlightSimulator.Model
                     planeData = simulatorData.Split(',');
                     Lon = float.Parse(planeData[0]);
                     Lat = float.Parse(planeData[1]);
-                    Console.WriteLine(simulatorData);
-                    Thread.Sleep(500);
                 }
             }
         }
         public void NotifyPropertyChanged(string propName)
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+        }
+
+        public void close()
+        {
+            IsProgramAlive = false;
+            if (client != null)
+            {
+                client.Close();
+            }
+            if (listener != null)
+            {
+                listener.Stop();
+            }
+
         }
 
     }

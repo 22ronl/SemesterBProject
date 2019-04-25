@@ -11,7 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-
+using FlightSimulator.ViewModels;
 namespace FlightSimulator
 {
     /// <summary>
@@ -22,11 +22,9 @@ namespace FlightSimulator
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = new MainWindowVM();
         }
 
-        private void PlaneControl_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
+      
     }
 }

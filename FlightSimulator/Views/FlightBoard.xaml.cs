@@ -33,6 +33,7 @@ namespace FlightSimulator.Views
         {
             InitializeComponent();
             flightBoardView = new FlightBoardViewModel();
+            // rigister the get notify from the view model
             flightBoardView.PropertyChanged += Vm_PropertyChanged;
             DataContext = flightBoardView;
         }
@@ -50,19 +51,12 @@ namespace FlightSimulator.Views
         {
             Nullable<float> y = flightBoardView.Lon;
             Nullable<float> x = flightBoardView.Lat;
+            // if lon and lat changed add points the flight board 
             if ((e.PropertyName.Equals("Lat") || e.PropertyName.Equals("Lon")) && (x != null && y != null))
             {
                 Point p1 = new Point((float)x, (float)y);
                 planeLocations.AppendAsync(Dispatcher, p1);
-               // Console.WriteLine(p1.X);
-                //Console.WriteLine(p1.Y);
             }
-
-            //     if (e.PropertyName.Equals("Lat") || e.PropertyName.Equals("Lon"))
-            //     {
-            //         Point p1 = new Point(0,0);            // Fill here!
-            //         planeLocations.AppendAsync(Dispatcher, p1);
-            //     }
         }
     }
 }

@@ -13,6 +13,7 @@ namespace FlightSimulator.ViewModels
         
         private double rudder;
         private double throttle;
+        // when the slider mover send command to the simulator 
         public double Rudder
         {
             get
@@ -36,16 +37,14 @@ namespace FlightSimulator.ViewModels
             set
             {
                 throttle = value;
-                //Console.WriteLine(throttle);
                 sliderMove("set controls/engines/current-engine/throttle", throttle);
                 NotifyPropertyChanged("throttle");
             }
         }
          private void sliderMove(string slider ,double value)
-        {
+        { 
           string val = value.ToString("0.00");
           string input = slider + " " + val;
-          //Console.WriteLine(input);
           Commands.Instance.commandSimulator(input);
         }
     }

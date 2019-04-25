@@ -20,6 +20,7 @@ namespace FlightSimulator.Model
         private static InfoServer m_Instance = null;
         private static Mutex mutex = new Mutex();
         public event PropertyChangedEventHandler PropertyChanged;
+        // singleton
         public static InfoServer Instance
         {
             get
@@ -31,6 +32,7 @@ namespace FlightSimulator.Model
                 return m_Instance;
             }
         }
+        // will change in case there the disconnect button was pressed 
         public bool IsProgramAlive
         {
             get
@@ -62,7 +64,7 @@ namespace FlightSimulator.Model
                 NotifyPropertyChanged("Lat");
             }
         }
-
+        // open the server on a thread
         public void openServer()
         {
             new Thread(delegate ()
@@ -79,6 +81,7 @@ namespace FlightSimulator.Model
             IPEndPoint ep = new IPEndPoint(IPAddress.Parse(ip), port);
             listener = new TcpListener(ep);
             listener.Start();
+            // in case the dissconnect button was pressed will not crush the program
             try { client = listener.AcceptTcpClient(); }
             catch { return; }
         }
@@ -91,11 +94,13 @@ namespace FlightSimulator.Model
             using (NetworkStream stream = client.GetStream())
             using (BinaryReader reader = new BinaryReader(stream))
             {
+                // read every char until new line and will update that Lon and Lat changed
                 while (IsProgramAlive)
                 {
                     simulatorData = "";
                     while (true)
                     { 
+                        // will not crush the program if the server is down 
                         try {
                             if ((letter = reader.ReadChar()) == '\n') 
                                 break;

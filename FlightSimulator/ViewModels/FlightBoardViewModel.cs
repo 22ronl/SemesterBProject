@@ -13,6 +13,7 @@ namespace FlightSimulator.ViewModels
         private InfoServer infoServer;
         public FlightBoardViewModel() {
             infoServer = InfoServer.Instance;
+            // sign to get notifactions from the server
             infoServer.PropertyChanged +=
                 delegate (object sender, PropertyChangedEventArgs e) {
                     NotifyPropertyChanged(e.PropertyName);

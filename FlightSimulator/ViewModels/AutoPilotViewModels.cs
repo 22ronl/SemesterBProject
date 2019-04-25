@@ -35,6 +35,7 @@ namespace FlightSimulator.ViewModels
             set
             {
                 inputString = value;
+                // in case there is nothing written the background should be white
                 if(inputString == "")
                 {
                     whiteBackGround = true;
@@ -57,23 +58,18 @@ namespace FlightSimulator.ViewModels
         }
         private void OnOk()
         {
+            // press on ok change the background to white and sends commnad to the simualtor 
             whiteBackGround = true;
             NotifyPropertyChanged("changeColor");
             Commands.Instance.sendCommand(userInput);
         }
 
-        private ICommand clearCommand = null;
+        private ICommand clearCommand;
         public ICommand Clear
         {
             get
             {
-                if(clearCommand == null)
-                {
-                   return clearCommand = new CommandHandler(() => clearOnClick());
-                } else
-                {
-                    return clearCommand;
-                }
+                return clearCommand ?? (clearCommand = new CommandHandler(() => clearOnClick()));
             }
         }
         

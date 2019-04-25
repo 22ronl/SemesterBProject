@@ -13,7 +13,7 @@ namespace FlightSimulator.ViewModels
     {
         private ICommand settingsCommand;
         private bool isConnected = false;
-        //property
+       
         public ICommand SettingsCommand
         {
             get
@@ -38,11 +38,11 @@ namespace FlightSimulator.ViewModels
         }
         private void OnConnect()
         {
+            // will connect to servers only once (first press)
             if(!isConnected)
             {
                 InfoServer.Instance.openServer();
                 Commands.Instance.openClient();
-
                 isConnected = true;
             }
 

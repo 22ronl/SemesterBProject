@@ -18,6 +18,7 @@ namespace FlightSimulator.ViewModels
                 return disconnectCommand ?? (disconnectCommand = new CommandHandler(() => disconnect()));
             }
         }
+        // close the servers when disconnect button is pressed
         private void disconnect()
         {
             new Thread(delegate ()

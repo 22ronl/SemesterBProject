@@ -15,6 +15,7 @@ namespace FlightSimulator.Model
         private static Commands m_Instance = null;
         private static Mutex mutex = new Mutex();
         private Thread connection;
+        // singleton
         public static Commands Instance
         {
             get
@@ -26,6 +27,7 @@ namespace FlightSimulator.Model
                 return m_Instance;
             }
         }
+        // change in case of dissconnect button is active 
         public bool IsProgramAlive
         {   
             get
@@ -52,6 +54,7 @@ namespace FlightSimulator.Model
         {
             IPEndPoint ep = new IPEndPoint(IPAddress.Parse(ip), port);
             client = new TcpClient();
+            // try to connect if the program is alive 
             while (true)
             {
                 if(!IsProgramAlive)
@@ -69,6 +72,7 @@ namespace FlightSimulator.Model
             stream = client.GetStream();
 
         }
+        // send a comman to simulaton if connected
         public void commandSimulator(string command)
         {
             if (!isConnected)
@@ -80,7 +84,7 @@ namespace FlightSimulator.Model
             stream.Write(bufferRoWrite, 0, bufferRoWrite.Length);
         }
               
-  
+        // split multiline commands to sent to the simualtor
         public void sendCommand(string userCommands)
         {
             if (!isConnected)
@@ -94,13 +98,15 @@ namespace FlightSimulator.Model
                 Thread.Sleep(2000);
             }
         }
-
+        // close the serever
         public void close()
         {
+            // if the thread has not finish change the property will lead to close the server
             if(connection.IsAlive)
             {
                 IsProgramAlive = false;
             }
+            isConnected = false;
             client.Close();
         }
     }
